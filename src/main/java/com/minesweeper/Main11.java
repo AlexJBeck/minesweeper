@@ -1,5 +1,7 @@
 package com.minesweeper;
 
+import javafx.application.Application;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -19,6 +21,6 @@ public class Main11 {
         }
 
         // Starten der JavaFX-Anwendung
-        //Application.launch(MinesweeperUi.class, args);
+        Application.launch(MinesweeperUi.class, args);
     }
 }

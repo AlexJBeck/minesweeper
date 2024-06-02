@@ -15,10 +15,13 @@ public class MinesweeperUi extends Application {
     private static final int SIZE = 10;
     private static final int MINES = 10;
     private Minesweeper game;
+    Database database = new Database();          //Todo how to click a Button to restart game without closeing window
 
     @Override
     public void start(Stage primaryStage) {
-        game = new Minesweeper(SIZE, MINES);
+        String username = new String("Alex"); //TODO change to user input!
+
+        game = new Minesweeper(database, username, SIZE, MINES);
         GridPane gridPane = createBoard();
 
         Scene scene = new Scene(gridPane);
@@ -62,8 +65,10 @@ public class MinesweeperUi extends Application {
             if (game.reveal(x, y)) {
                 button.setText(game.getCell(x, y));
                 if (game.isMine(x, y)) {
+                    database.incrementLosses("Alex"); //Todo change user input
                     gameOver();
                 } else if (game.checkWin()) {
+                    database.incrementWins("Alex");//Todo change user input
                     gameWon();
                 }
             }

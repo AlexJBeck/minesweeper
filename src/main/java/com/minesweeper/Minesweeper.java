@@ -3,13 +3,17 @@ package com.minesweeper;
 import java.util.Random;
 
 public class Minesweeper {
+    private final Database database;
+    private final String username;
     private int size;
     private int mines;
     private char[][] board;
     private boolean[][] minesGrid;
     private boolean[][] revealed;
 
-    public Minesweeper(int size, int mines) {
+    public Minesweeper(Database database, String username, int size, int mines) {
+        this.database = database;
+        this.username = username;
         this.size = size;
         this.mines = mines;
         board = new char[size][size];

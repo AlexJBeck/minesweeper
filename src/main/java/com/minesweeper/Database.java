@@ -13,15 +13,18 @@ public class Database {
     }
 
     public void createTable() {
-        String createTableSQL = "CREATE TABLE IF NOT EXISTS users ("
-                + "id SERIAL PRIMARY KEY, "
-                + "name VARCHAR(100) NOT NULL "
-                //+ "email VARCHAR(100) NOT NULL UNIQUE"
+        String createStatsTableSQL = "CREATE TABLE IF NOT EXISTS stats ("
+                //+ "id SERIAL PRIMARY KEY, "
+                + "username VARCHAR(100) NOT NULL, "
+                + "wins INTEGER NOT NULL DEFAULT 0, "
+                + "losses INTEGER NOT NULL DEFAULT 0 "
+                //+ "board_size INTEGER NOT NULL DEFAULT -100, "
+                //+ "FOREIGN KEY (username) REFERENCES users(name)"
                 + ");";
 
         try (Connection conn = connect();
              Statement stmt = conn.createStatement()) {
-            stmt.execute(createTableSQL);
+            stmt.execute(createStatsTableSQL);
             System.out.println("Table 'users' created successfully.");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -29,7 +32,9 @@ public class Database {
     }
 
     public void addPlayer(String name) {
-        String insertPlayerSQL = "INSERT INTO users(name, email) VALUES(?, ?)";
+        //String insertPlayerSQL = "INSERT INTO users(name) VALUES(?)";
+        String insertPlayerSQL = "INSERT INTO stats(username) VALUES(?)";
+
 
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(insertPlayerSQL)) {
@@ -42,11 +47,37 @@ public class Database {
         }
     }
 
+    public void incrementWins(String name) {
+        String updateWinsSQL = "UPDATE stats SET wins = wins + 1 WHERE username = ?";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(updateWinsSQL)) {
+            pstmt.setString(1, name);
+            pstmt.executeUpdate();
+            System.out.println("Wins incremented for user ID: " + name);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void incrementLosses(String name) {
+        String updateLossesSQL = "UPDATE stats SET losses = losses + 1 WHERE username = ?";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(updateLossesSQL)) {
+            pstmt.setString(1, name);
+            pstmt.executeUpdate();
+            System.out.println("Losses incremented for user ID: " + name);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
 
 
     public static void main(String[] args) {
         Database db = new Database();
-        db.createTable();
+        db.incrementLosses("Alex");
 
     }
 }
