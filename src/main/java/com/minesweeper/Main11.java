@@ -9,6 +9,8 @@ public class Main11 {
     public static void main(String[] args) {
         // Verbindung zur Datenbank herstellen
         Database dbConnection = new Database();
+        dbConnection.createTable(); // Optional: Tabelle erstellen, falls noch nicht vorhanden
+
         try (Connection conn = dbConnection.connect()) {
             if (conn != null) {
                 System.out.println("Connected to the PostgreSQL server successfully.");
