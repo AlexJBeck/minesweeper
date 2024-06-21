@@ -9,12 +9,14 @@ public class Minesweeper {
     private final String[][] board;
     private final boolean[][] revealed;
     private final Random random = new Random();
+    private boolean exploded;
 
     public Minesweeper(Database database, String username, int size, int numMines) {
         this.size = size;
         this.numMines = numMines;
         this.board = new String[size][size];
         this.revealed = new boolean[size][size];
+        this.exploded = false;
 
         initializeBoard();
         placeMines();
@@ -48,6 +50,8 @@ public class Minesweeper {
                     int count = countAdjacentMines(i, j);
                     if (count > 0) {
                         board[i][j] = String.valueOf(count);
+                    } else {
+                        board[i][j] = " ";
                     }
                 }
             }
@@ -82,10 +86,34 @@ public class Minesweeper {
 
     public boolean reveal(int x, int y) {
         if (revealed[x][y]) {
-            return false; // Already revealed
+            return false; // Already revealed or flagged
         }
+
         revealed[x][y] = true;
+
+        if (board[x][y].equals("X")) {
+            // Mine was revealed
+            exploded = true;
+            revealAll(); // Reveal all cells after explosion
+            return true;
+        } else if (board[x][y].equals(" ")) {
+            openAdjacentCells(x, y); // If cell is empty, open adjacent cells
+        }
+
         return true;
+    }
+
+    private void revealAll() {
+        // Mark all cells as revealed
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                revealed[i][j] = true;
+            }
+        }
+    }
+
+    public boolean isExploded() {
+        return exploded;
     }
 
     public boolean isRevealed(int x, int y) {
@@ -93,6 +121,9 @@ public class Minesweeper {
     }
 
     public boolean checkWin() {
+        if (exploded) {
+            return false; // Cannot win if a mine has exploded
+        }
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (!revealed[i][j] && !board[i][j].equals("X")) {
@@ -104,17 +135,14 @@ public class Minesweeper {
     }
 
     public void openAdjacentCells(int x, int y) {
-
-        // Iteriere über die 8 angrenzenden Felder (um das Feld x, y)
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 int nx = x + dx;
                 int ny = y + dy;
-                // Überprüfe, ob das Feld gültig ist und noch nicht geöffnet wurde
-                if (isValidCell(nx, ny) && !isRevealed(nx, ny) && getCell(nx, ny).equals("0")) {
-                        openAdjacentCells(nx, ny);
-                    }
+                if (isValidCell(nx, ny) && !isRevealed(nx, ny)) {
+                    reveal(nx, ny);
                 }
             }
         }
     }
+}
