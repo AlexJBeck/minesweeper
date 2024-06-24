@@ -387,6 +387,13 @@ public class MinesweeperUi extends Application {
         @Override
         public void handle(ActionEvent event) {
             if (!gameOver) {
+                // Überprüfe, ob das Feld eine Flagge oder einen Hinweis hat
+                if (button.getGraphic() != null) {
+                    ImageView graphic = (ImageView) button.getGraphic();
+                    if (graphic.getImage() == flagImage || graphic.getImage() == hintImage) {
+                        return; // Wenn das Feld markiert ist, ignoriere den Klick
+                    }
+                }
                 game.reveal(x, y);
                 updateBoard();
                 if (game.isMine(x, y)) {
