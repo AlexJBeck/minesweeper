@@ -18,8 +18,8 @@ import java.util.Optional;
 
 public class MinesweeperUi extends Application {
 
-    private static final int SIZE = 10;
-    private static final int MINES = 10;
+    private static int SIZE = 10;
+    private static int MINES = 10;
     private static String username = "unknown";
     private Minesweeper game;
     private final Database database = new Database();
@@ -172,6 +172,16 @@ public class MinesweeperUi extends Application {
         timerLabel.setText("00:00"); // Reset timer label to 00:00
         smileyImageView.setImage(happyImage); // Reset smiley image to happy
 
+        // Neu Initialisieren des Buttons-Arrays und des Spielfeldes
+        GridPane gridPane = createBoard();
+
+        // Root-Layout aktualisieren
+        VBox root = (VBox) timerLabel.getScene().getRoot();
+        if (root.getChildren().size() > 2) {
+            root.getChildren().remove(2); // Altes Spielfeld entfernen
+        }
+        root.getChildren().add(gridPane); // Neues Spielfeld hinzufügen
+
         // Reset all buttons to initial state
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -187,6 +197,7 @@ public class MinesweeperUi extends Application {
         // Starte den Timer-Thread neu
         startTimer();
     }
+
 
     private void updateBoard() {
         for (int i = 0; i < SIZE; i++) {
@@ -244,13 +255,122 @@ public class MinesweeperUi extends Application {
                 break;
         }
     }
-
     private void changeDifficulty() {
-        // Implementation for changing difficulty
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Change Difficulty");
+        dialog.setHeaderText("Select the difficulty level:");
+
+        ChoiceBox<String> choiceBox = new ChoiceBox<>();
+        choiceBox.getItems().addAll("Beginner", "Intermediate", "Expert");
+        choiceBox.setValue("Beginner");
+
+        VBox vbox = new VBox(choiceBox);
+        vbox.setAlignment(Pos.CENTER_LEFT);
+        vbox.setSpacing(10);
+        dialog.getDialogPane().setContent(vbox);
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                String selectedDifficulty = choiceBox.getValue();
+                switch (selectedDifficulty) {
+                    case "Intermediate":
+                        SIZE = 16;
+                        MINES = 40;
+                        break;
+                    case "Expert":
+                        SIZE = 22;
+                        MINES = 99;
+                        break;
+                    default:
+                        SIZE = 10;
+                        MINES = 10;
+                        break;
+                }
+                resetGame((Stage) timerLabel.getScene().getWindow()); // Restart the game with new settings
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
     }
 
+
+    private void resetGame(Stage primaryStage) {
+        game = new Minesweeper(database, username, SIZE, MINES);
+        remainingMines = MINES;
+        minesLabel.setText(" " + remainingMines);
+        gameOver = false;
+        startTime = System.currentTimeMillis();
+        timerLabel.setText("00:00");
+        smileyImageView.setImage(happyImage);
+
+        VBox root = new VBox();
+
+        MenuBar menuBar = createMenuBar();
+        root.getChildren().add(menuBar);
+
+        HBox infoBox = new HBox();
+        infoBox.setAlignment(Pos.CENTER);
+
+        // Laden der Bilder
+        flagImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/flag.png")));
+        hintImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/hint.png")));
+        mineImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/mine.png")));
+        Image clockImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/clock.png")));
+        happyImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/happy.png")));
+        sadImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/sad.png")));
+
+        ImageView mineImageView = new ImageView(mineImage);
+        mineImageView.setFitWidth(20);
+        mineImageView.setFitHeight(20);
+        minesLabel = new Label(" " + remainingMines);
+        minesLabel.setStyle("-fx-font-size: 20;");
+        HBox minesBox = new HBox(mineImageView, minesLabel);
+        minesBox.setAlignment(Pos.CENTER_LEFT);
+
+        ImageView clockImageView = new ImageView(clockImage);
+        clockImageView.setFitWidth(20);
+        clockImageView.setFitHeight(20);
+        timerLabel = new Label("00:00");
+        timerLabel.setStyle("-fx-font-size: 20;");
+        HBox timerBox = new HBox(timerLabel, clockImageView);
+        timerBox.setAlignment(Pos.CENTER_RIGHT);
+
+        smileyImageView = new ImageView(happyImage);
+        smileyImageView.setFitWidth(30);
+        smileyImageView.setFitHeight(30);
+        smileyImageView.setOnMouseClicked(event -> startNewGame());
+
+        HBox leftBox = new HBox(minesBox);
+        leftBox.setAlignment(Pos.CENTER_LEFT);
+        HBox rightBox = new HBox(timerBox);
+        rightBox.setAlignment(Pos.CENTER_RIGHT);
+        HBox centerBox = new HBox(smileyImageView);
+        centerBox.setAlignment(Pos.CENTER);
+
+        infoBox.getChildren().addAll(leftBox, centerBox, rightBox);
+        HBox.setHgrow(leftBox, Priority.ALWAYS);
+        HBox.setHgrow(centerBox, Priority.ALWAYS);
+        HBox.setHgrow(rightBox, Priority.ALWAYS);
+        root.getChildren().add(infoBox);
+
+        GridPane gridPane = createBoard();
+        root.getChildren().add(gridPane);
+
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        startTimer();
+        updateBoard();
+    }
+
+
+
     private void showHighScores() {
-        // Implementation for showing high scores
+
     }
 
     private class ButtonHandler implements EventHandler<ActionEvent> {
