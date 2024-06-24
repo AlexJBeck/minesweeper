@@ -336,8 +336,8 @@ public class MinesweeperUi extends Application {
                 remainingMines--; // Decrease the remaining mines count
             } else if (((ImageView) button.getGraphic()).getImage() == flagImage) {
                 ImageView imageView = new ImageView(hintImage);
-                imageView.setFitWidth(15);
-                imageView.setFitHeight(15);
+                imageView.setFitWidth(20);
+                imageView.setFitHeight(20);
                 button.setGraphic(imageView);
                 remainingMines++; // Increase the remaining mines count
             } else {
