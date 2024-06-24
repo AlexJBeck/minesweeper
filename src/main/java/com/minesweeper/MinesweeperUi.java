@@ -387,20 +387,15 @@ public class MinesweeperUi extends Application {
         @Override
         public void handle(ActionEvent event) {
             if (!gameOver) {
-                game.reveal(x, y);
-                updateBoard();
-                if (game.isMine(x, y)) {
-                    button.setStyle("-fx-background-color: red;"); // Mark the exploded mine with red color
-                    smileyImageView.setImage(sadImage); // Change smiley image to sad
-                    gameOver = true;
-                    showGameOverAlert(false);
-                } else if (game.checkWin()) {
-                    gameOver = true;
-                    showGameOverAlert(true);
+                // Überprüfe, ob das Feld eine Flagge oder einen Hinweis hat
+                if (button.getGraphic() != null) {
+                    ImageView graphic = (ImageView) button.getGraphic();
+                    if (graphic.getImage() == flagImage || graphic.getImage() == hintImage) {
+                        return; // Wenn das Feld markiert ist, ignoriere den Klick
+                    }
                 }
-            }
         }
-    }
+        }}
 
     private void showGameOverAlert(boolean won) {
         // Beende den Timer-Thread, bevor das Spiel neu gestartet oder beendet wird
