@@ -4,11 +4,11 @@ import java.util.Random;
 
 public class Minesweeper {
 
-    private final int size;
-    private final int numMines;
-    private final String[][] board;
-    private final boolean[][] revealed;
-    private final Random random = new Random();
+    private int size;
+    private int numMines;
+    private String[][] board;
+    private boolean[][] revealed;
+    private Random random = new Random();
     private boolean exploded;
 
     public Minesweeper(Database database, String username, int size, int numMines) {
@@ -99,7 +99,6 @@ public class Minesweeper {
         } else if (board[x][y].equals(" ")) {
             openAdjacentCells(x, y); // If cell is empty, open adjacent cells
         }
-
         return true;
     }
 

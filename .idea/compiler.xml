@@ -7,10 +7,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="minesweeper" />
+        <module name="Minesweeper-Main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="Minesweeper-Main" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>

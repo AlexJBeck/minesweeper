@@ -9,10 +9,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -36,6 +40,7 @@ public class MinesweeperUi extends Application {
     private ImageView smileyImageView;
     private int remainingMines = MINES; // Anzahl der verbleibenden Minen
     private Thread timerThread; // Timer-Thread als Instanzvariable
+    private String currentdifficulty = "Beginner";
 
         @Override
     public void start(Stage primaryStage) {
@@ -45,6 +50,7 @@ public class MinesweeperUi extends Application {
         dialog.setHeaderText("Enter your username:");
         Optional<String> result = dialog.showAndWait();
         username = result.orElse("unknown");
+        //database.addPlayer(username);
 
         game = new Minesweeper(database, username, SIZE, MINES);
 
@@ -278,14 +284,17 @@ public class MinesweeperUi extends Application {
                     case "Intermediate":
                         SIZE = 16;
                         MINES = 40;
+                        currentdifficulty = "Intermediate";
                         break;
                     case "Expert":
                         SIZE = 22;
                         MINES = 99;
+                        currentdifficulty = "Expert";
                         break;
                     default:
                         SIZE = 10;
                         MINES = 10;
+                        currentdifficulty = "Beginner";
                         break;
                 }
                 resetGame((Stage) timerLabel.getScene().getWindow()); // Restart the game with new settings
@@ -370,7 +379,18 @@ public class MinesweeperUi extends Application {
 
 
     private void showHighScores() {
+        List<String> highScores = database.getHighScores(currentdifficulty);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("High Scores");
+        alert.setHeaderText("Top 10 High Scores for " + currentdifficulty);
 
+        StringBuilder content = new StringBuilder();
+        for (String score : highScores) {
+            content.append(score).append("\n");
+        }
+
+        alert.setContentText(content.toString());
+        alert.showAndWait();
     }
 
     private class ButtonHandler implements EventHandler<ActionEvent> {
@@ -410,22 +430,32 @@ public class MinesweeperUi extends Application {
     }
 
     private void showGameOverAlert(boolean won) {
-        // Beende den Timer-Thread, bevor das Spiel neu gestartet oder beendet wird
+        // Stop the timer thread before restarting or ending the game
         if (timerThread != null && timerThread.isAlive()) {
             timerThread.interrupt();
         }
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Game Over");
         if (won) {
-            alert.setHeaderText("Congratulations, you won!");
+            alert.setTitle("Congratulations!");
+            alert.setHeaderText("You won!");
+
+            // Calculate the time taken
+            long endTime = System.currentTimeMillis();
+            long elapsed = endTime - startTime;
+            //Timestamp timestamp = new Timestamp(elapsed);
+
+            // Update the best time in the database
+            database.updateBestTime(username, currentdifficulty, elapsed);
         } else {
-            alert.setHeaderText("Game Over! You hit a mine.");
+            alert.setTitle("Game Over");
+            alert.setHeaderText("You hit a mine!");
         }
         alert.setContentText("Close this message to continue.");
         revealAll();
         alert.showAndWait();
     }
+
 
     private void startTimer() {
         timerThread = new Thread(() -> {

@@ -9,7 +9,7 @@ public class Main {
     public static void main(String[] args) {
         // Verbindung zur Datenbank herstellen
         Database dbConnection = new Database();
-        dbConnection.createTable(); // Optional: Tabelle erstellen, falls noch nicht vorhanden
+        //dbConnection.createTable(); // Optional: Tabelle erstellen, falls noch nicht vorhanden
 
         try (Connection conn = dbConnection.connect()) {
             if (conn != null) {
